@@ -1,18 +1,16 @@
-
 import axios from "axios";
-interface loginType{
-    email:string,
-    password:string
+interface loginType {
+  email: string;
+  password: string;
 }
-export const sendLoginRequest=async({email,password}:loginType)=>{
-    try{
-        const response=await axios.post("http://localhost:3000/api/login",{
-            email:email,
-            password:password
-        })
-        return response.data
-    }
-    catch (e){
-        console.error(e)
-    }
-}
+export const sendLoginRequest = async ({ email, password }: loginType) => {
+  try {
+    const response = await axios.post("http://localhost:3000/api/login", {
+      email: email,
+      password: password,
+    });
+    return response.data;
+  } catch (e) {
+    console.error(e);
+  }
+};
