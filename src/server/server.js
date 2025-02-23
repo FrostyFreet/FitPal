@@ -118,7 +118,56 @@ app.get("/api/fetchFullName",async(req,res)=>{
         console.error(error)
     }
 })
+app.post("/api/changeUserDetails",async(req,res)=>{
+    const {weight,height,gender,goal}=req.body
+    try{
+        const { data: sessionData } = await supabase.auth.getSession()
+        if (!sessionData || !sessionData.session || !sessionData.session.user) {
+            console.error("No authenticated user found.")
+            res.status(401).send("Unauthorized")
+            return
+        }
+        const userId = sessionData.session.user.id
 
+        const {error } = await supabase
+            .from('user_details')
+            .update({weight:weight,height:height,gender:gender,fitness_goal:goal})
+            .eq("supabase_user_id",userId)
+        if(error){
+            console.error(error)
+            res.error(error)
+        }
+    }
+    catch (e) {
+        console.error("An error occurred while updating user details",e)
+    }
+})
+app.get("/api/fetchUserDetails",async(req,res)=>{
+    try{
+        const { data: sessionData } = await supabase.auth.getSession()
+        if (!sessionData || !sessionData.session || !sessionData.session.user) {
+            console.error("No authenticated user found.")
+            res.status(401).send("Unauthorized")
+            return
+        }
+        const userId = sessionData.session.user.id
+
+        const {data,error } = await supabase
+            .from('user_details')
+            .select("weight,height,gender,fitness_goal")
+            .eq("supabase_user_id",userId)
+        if(error){
+            console.error(error)
+            res.error(error)
+        }
+        else{
+            res.status(200).json(data)
+        }
+    }
+    catch (e) {
+        console.error("An error occurred while updating user details",e)
+    }
+})
 
 app.listen(port,()=>console.log(`Server is listening on port ${port}`) )
 

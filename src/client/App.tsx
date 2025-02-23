@@ -12,17 +12,16 @@ import Login from "./auth/Login.tsx";
 import {createContext, useEffect, useState} from "react";
 import {useQuery} from "@tanstack/react-query";
 import {isLoggedIn} from "./api/isLoggedIn.tsx";
-import {LoggedInData} from "./types.tsx";
-
+import { LoggedInData} from "./types.tsx";
 export const IsLoggedInContext = createContext<LoggedInData | null>(null)
 
 function App() {
   const [loggedIn,setLoggedIn]=useState(null)
-
   const { data: isLoggedInData,isSuccess  } = useQuery({
     queryKey: ["isLoggedInData"],
     queryFn: isLoggedIn,
   });
+
   useEffect(() => {
     if(isSuccess && isLoggedInData.session!==null && isLoggedInData.session.access_token){
       setLoggedIn(isLoggedInData)
@@ -33,7 +32,6 @@ function App() {
   }, [isSuccess]);
 
   console.log(loggedIn)
-
   return (
       <IsLoggedInContext.Provider value={loggedIn}>
         <Layout data-oid="xixv02.">
