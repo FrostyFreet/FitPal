@@ -17,7 +17,8 @@ const navItems2 = [
 ]
 
 export function Sidebar({open, setOpen}: { open: boolean; setOpen: (open: boolean) => void}) {
-  const loggedIn=useContext(IsLoggedInContext)
+  const context=useContext(IsLoggedInContext)!
+  const {loggedIn}=context
 
   return (
     <>
@@ -43,7 +44,7 @@ export function Sidebar({open, setOpen}: { open: boolean; setOpen: (open: boolea
 
         <nav className="mt-5 px-2" >
           {/* Navitems with profile settings*/}
-          {loggedIn!==null? navItems1.map((item) => (
+          {loggedIn && loggedIn!==null? navItems1.map((item) => (
             <Link
               key={item.href}
               to={item.href}

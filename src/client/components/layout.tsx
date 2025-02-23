@@ -7,7 +7,8 @@ import {IsLoggedInContext} from "../App.tsx";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const loggedIn=useContext(IsLoggedInContext)
+  const context=useContext(IsLoggedInContext)!
+  const {loggedIn}=context
 
   return (
     <div className="flex h-screen bg-gray-100">
