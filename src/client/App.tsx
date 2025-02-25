@@ -15,6 +15,10 @@ import {isLoggedIn} from "./api/isLoggedIn.tsx";
 import {ContextType, LoggedInData, UserDetails} from "./types.tsx";
 import {fetchUserDetails} from "./api/fetchUserDetails.tsx";
 import {addTdeeToDb} from "./api/addTdeeToDb.tsx";
+import {calculateBMR} from "./helperFunctions/CalculateBMR.tsx";
+import {calculateTDEE} from "./helperFunctions/CalculateTDEE.tsx";
+import {addCalorieByGoalToDb} from "./api/addCalorieByGoalToDb.tsx";
+import {calculateCalorieNeedByGoal} from "./helperFunctions/CalculateCalorieNeedByGoal.tsx";
 export const IsLoggedInContext = createContext<ContextType | null>(null)
 
 function App() {
@@ -22,7 +26,7 @@ function App() {
   const [userDetail,setUserDetails]=useState<UserDetails | null>(null)
   const [isDetailsSuccess,setIsDetailsSuccess]=useState<boolean>(false)
   const [BMR,setBMR] = useState<number>(0);
-  const [tdee,setTdee]=useState<number>()
+  const [,setTdee]=useState<number|undefined>()
 
   const { data: isLoggedInData,isSuccess  } = useQuery({
     queryKey: ["isLoggedInData"],
@@ -35,64 +39,45 @@ function App() {
     enabled: loggedIn !== null,
   })
 
-  const {mutate}=useMutation({
+  const {mutate:TDEE}=useMutation({
     mutationFn:addTdeeToDb,
     onSuccess:()=>{
       console.log("Inserted tdee")
     }
   })
+  const {mutate:CALORIE}=useMutation({
+    mutationFn:addCalorieByGoalToDb,
+    onSuccess:()=>{
+      console.log("Inserted CALORIE")
+    }
+  })
 
   useEffect(() => {
-    if (
-        isSuccess &&
-        isLoggedInData.session !== null &&
-        isLoggedInData.session.access_token
+    if (isSuccess && isLoggedInData.session !== null && isLoggedInData.session.access_token
     ) {
       setLoggedIn(isLoggedInData);
       if (detailsSuccess && userDetailsData && userDetailsData.length > 0) {
-        const { weight, height, gender, age, activity_level } = userDetailsData[0];
-
+        const { weight, height, gender, age, activity_level,fitness_goal } = userDetailsData[0];
         // Update user details state if needed
         setUserDetails(userDetailsData[0]);
+        const calculatedBMR=calculateBMR(gender,weight,height,age)
+        const calculatedTDEE=calculateTDEE(BMR,activity_level)
+        const calculatedCalorieByGoal=calculateCalorieNeedByGoal(calculatedTDEE,fitness_goal)
 
-        // Compute BMR directly using the fetched values
-        let calculatedBmr = 0;
-        if (gender === "male") {
-          calculatedBmr = 88.362 + 13.397 * weight + 4.799 * height - 5.677 * age;
-        } else if (gender === "female") {
-          calculatedBmr = 447.593 + 9.247 * weight + 3.098 * height - 4.330 * age;
-        }
-        setBMR(calculatedBmr);
+        setBMR(calculatedBMR)
+        setTdee(calculatedTDEE)
+        TDEE(calculatedTDEE)
+        CALORIE(calculatedCalorieByGoal)
 
-        // Calculate TDEE based on activity level
-        let calculatedTdee = 0;
-        if (calculatedBmr !== 0) {
-          if (activity_level === "sedentary") {
-            calculatedTdee = calculatedBmr * 1.2;
-          } else if (activity_level === "ligthly_active") {
-            calculatedTdee = calculatedBmr * 1.375;
-          } else if (activity_level === "moderately_active") {
-            calculatedTdee = calculatedBmr * 1.55;
-          } else if (activity_level === "very_active") {
-            calculatedTdee = calculatedBmr * 1.725;
-          } else if (activity_level === "extra_active") {
-            calculatedTdee = calculatedBmr * 1.9;
-          }
-          setTdee(calculatedTdee);
-
-          mutate(calculatedTdee)
-        }
         setIsDetailsSuccess(true);
+
       }
     } else {
       setLoggedIn(null);
     }
   }, [detailsSuccess, isLoggedInData, isSuccess, userDetailsData]);
 
-
-
-
-  console.log(tdee)
+  console.log(userDetail)
   return (
       <IsLoggedInContext.Provider value={{loggedIn,userDetail,isDetailsSuccess}}>
         <Layout data-oid="xixv02.">

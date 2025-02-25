@@ -154,7 +154,7 @@ app.get("/api/fetchUserDetails",async(req,res)=>{
 
         const {data,error } = await supabase
             .from('user_details')
-            .select("full_name,weight,height,gender,fitness_goal,activity_level,age,tdee")
+            .select()
             .eq("supabase_user_id",userId)
         if(error){
             console.error(error)
@@ -183,6 +183,31 @@ app.post("/api/insertTdee",async(req,res)=>{
         const {error } = await supabase
             .from('user_details')
             .update({tdee:tdee})
+            .eq("supabase_user_id",userId)
+        if(error){
+            console.error(error)
+            res.error(error)
+        }
+    }
+    catch (e) {
+        console.error("An error occurred while updating user details",e)
+    }
+})
+
+app.post("/api/insertCalorieNeedByGoal",async(req,res)=>{
+    const {calorie}=req.body
+    try{
+        const { data: sessionData } = await supabase.auth.getSession()
+        if (!sessionData || !sessionData.session || !sessionData.session.user) {
+            console.error("No authenticated user found.")
+            res.status(401).send("Unauthorized")
+            return
+        }
+        const userId = sessionData.session.user.id
+
+        const {error } = await supabase
+            .from('user_details')
+            .update({calorie_by_goal:calorie})
             .eq("supabase_user_id",userId)
         if(error){
             console.error(error)

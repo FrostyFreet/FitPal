@@ -80,7 +80,7 @@ export default function Dashboard() {
                                   {"Calorie Goal"}
                               </p>
                               <p className="text-xl sm:text-2xl font-semibold text-gray-900">
-                                  {userDetailsData && userDetailsData[0].tdee}
+                                  {userDetailsData && userDetailsData[0].calorie_by_goal}
                               </p>
                           </div>
                       </div>
