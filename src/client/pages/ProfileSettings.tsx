@@ -88,7 +88,7 @@ export default function ProfileSettings() {
     updateUser(userDetails)
   }
 
-  console.log(loggedIn)
+
 
   return (
       <div className="max-w-6xl mx-auto">

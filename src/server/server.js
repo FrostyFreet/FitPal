@@ -3,6 +3,7 @@ import cors from 'cors'
 import {createClient} from '@supabase/supabase-js'
 import dotenv from 'dotenv';
 import path from 'path';
+import axios from "axios";
 
 dotenv.config({ path: '../../.env'});
 
@@ -101,7 +102,6 @@ app.get("/api/fetchFullName",async(req,res)=>{
     const { data: sessionData } = await supabase.auth.getSession()
 
     if (!sessionData || !sessionData.session || !sessionData.session.user) {
-        console.error("No authenticated user found.")
         res.status(401).send("Unauthorized")
         return
     }
@@ -123,7 +123,6 @@ app.post("/api/changeUserDetails",async(req,res)=>{
     try{
         const { data: sessionData } = await supabase.auth.getSession()
         if (!sessionData || !sessionData.session || !sessionData.session.user) {
-            console.error("No authenticated user found.")
             res.status(401).send("Unauthorized")
             return
         }
@@ -174,7 +173,6 @@ app.post("/api/insertTdee",async(req,res)=>{
     try{
         const { data: sessionData } = await supabase.auth.getSession()
         if (!sessionData || !sessionData.session || !sessionData.session.user) {
-            console.error("No authenticated user found.")
             res.status(401).send("Unauthorized")
             return
         }
@@ -199,7 +197,6 @@ app.post("/api/insertCalorieNeedByGoal",async(req,res)=>{
     try{
         const { data: sessionData } = await supabase.auth.getSession()
         if (!sessionData || !sessionData.session || !sessionData.session.user) {
-            console.error("No authenticated user found.")
             res.status(401).send("Unauthorized")
             return
         }
@@ -216,6 +213,125 @@ app.post("/api/insertCalorieNeedByGoal",async(req,res)=>{
     }
     catch (e) {
         console.error("An error occurred while updating user details",e)
+    }
+})
+
+
+app.get("/api/fetchDailyLogs",async(req,res)=>{
+    const { data: sessionData } = await supabase.auth.getSession()
+    if (!sessionData || !sessionData.session || !sessionData.session.user) {
+        res.status(401).send("Unauthorized")
+        return
+    }
+    const userId = sessionData.session.user.id
+    if(sessionData){
+        try{
+            const {data,error}=await supabase.from('daily_logs')
+                .select(`*,user_details(supabase_user_id)`)
+
+            if(error){
+                console.error("Error occurred while querying",error)
+            }
+            if (!data || data.length === 0) {
+                return res.json({ message: "No data found" });
+            }
+
+            res.status(200).json(data);
+        }
+        catch (e) {
+            console.error("An error occurred while fetching daily logs "+e)
+        }
+    }
+
+})
+
+app.post("/api/insertToDailyLogs",async(req,res)=>{
+    const {date,tcc,tcb,ts,twm,notes}=req.body
+    const { data: sessionData } = await supabase.auth.getSession()
+    if (!sessionData || !sessionData.session || !sessionData.session.user) {
+        res.status(401).send("Unauthorized")
+        return
+    }
+    const userId = sessionData.session.user.id
+
+    try{
+        const{data,error}=await supabase.from('daily_logs')
+            .update({user_id:userId,
+                date:date,
+                total_calories_consumed:tcc,
+                total_calories_burned:tcb,
+                total_steps:ts,
+                total_workout_minutes:twm,
+                notes:notes
+            })
+        if(error){
+            console.error(error)
+            res.error(error)
+        }
+        res.status(200).json(data)
+    }
+    catch (e) {
+        console.error(e)
+    }
+
+
+})
+
+app.get("/api/caloriesBurnedByActivity",async(req,res)=>{
+    const {activity,duration}=req.query
+    const { data: sessionData } = await supabase.auth.getSession()
+    if (!sessionData || !sessionData.session || !sessionData.session.user) {
+        res.status(401).send("Unauthorized")
+        return
+    }
+    const userId = sessionData.session.user.id
+    if(sessionData) {
+        try {
+            //retrieving user weight
+            const {data:userDetails}= await supabase
+                .from('user_details')
+                .select('weight')
+                .eq('supabase_user_id',userId)
+
+            const userWeight = userDetails[0].weight;
+            const response = await axios.get(`https://api.api-ninjas.com/v1/caloriesburned`, {
+                params: {activity: activity,weight:userWeight,duration:duration},
+                headers: {'X-Api-Key': process.env.VITE_API_NINJA_API_KEY}
+            })
+
+            if (response) {
+                res.status(200).json(response.data)
+            }
+
+        } catch (e) {
+            console.error(e)
+        }
+    }
+})
+
+app.post("/api/insertDailyActivity",async(req,res)=>{
+    const {activity,total_calories,duration}=req.body
+    const { data: sessionData } = await supabase.auth.getSession()
+    if (!sessionData || !sessionData.session || !sessionData.session.user) {
+        res.status(401).send("Unauthorized")
+        return
+    }
+    const userId = sessionData.session.user.id
+    if(sessionData) {
+        try {
+
+            const{data,error}=await supabase.from('workout_logs')
+                .upsert({user_id:userId,workout_type:activity,duration_minutes:duration,calories_burned:total_calories})
+
+            if(error){
+                console.error(error)
+            }
+            res.status(200).json(data)
+
+
+        } catch (e) {
+            console.error(e)
+        }
     }
 })
 

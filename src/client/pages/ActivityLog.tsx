@@ -12,7 +12,7 @@ const activities = [
 ]
 
 export default function ActivityLog() {
-  const [isActivityModalOpen, setIsActivityModalOpen] = useState(false)
+    const [isActivityModalOpen, setIsActivityModalOpen] = useState(false)
 
   return (
       <div className="max-w-7xl mx-auto">

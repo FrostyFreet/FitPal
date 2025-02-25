@@ -1,9 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import {useContext, useState} from "react"
 import { Link } from "react-router"
 import { ArrowLeft, Plus } from "lucide-react"
 import MealModal from "../components/MealModal"
+import {IsLoggedInContext} from "../App.tsx";
 
 const meals = [
   { name: "Breakfast", calories: 400, protein: 20, carbs: 50, fat: 15 },
@@ -12,7 +13,9 @@ const meals = [
 ]
 
 export default function Nutrition() {
-  const [isMealModalOpen, setIsMealModalOpen] = useState(false)
+    const [isMealModalOpen, setIsMealModalOpen] = useState(false)
+    const context=useContext(IsLoggedInContext)!
+    const {userDetail}=context
 
   return (
       <div className="max-w-7xl mx-auto">
@@ -36,7 +39,7 @@ export default function Nutrition() {
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
             <div>
               <p className="text-sm text-gray-500">Calories</p>
-              <p className="text-xl sm:text-2xl font-semibold text-gray-900">1,500 / 2,000</p>
+              <p className="text-xl sm:text-2xl font-semibold text-gray-900">1,500 / {userDetail && userDetail.calorie_by_goal}</p>
             </div>
             <div>
               <p className="text-sm text-gray-500">Protein</p>

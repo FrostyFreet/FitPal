@@ -19,14 +19,13 @@ import {calculateBMR} from "./helperFunctions/CalculateBMR.tsx";
 import {calculateTDEE} from "./helperFunctions/CalculateTDEE.tsx";
 import {addCalorieByGoalToDb} from "./api/addCalorieByGoalToDb.tsx";
 import {calculateCalorieNeedByGoal} from "./helperFunctions/CalculateCalorieNeedByGoal.tsx";
+import {fetchDailyLogs} from "./api/fetchDailyLogs.tsx";
 export const IsLoggedInContext = createContext<ContextType | null>(null)
 
 function App() {
   const [loggedIn,setLoggedIn]=useState<LoggedInData | null>(null)
   const [userDetail,setUserDetails]=useState<UserDetails | null>(null)
   const [isDetailsSuccess,setIsDetailsSuccess]=useState<boolean>(false)
-  const [BMR,setBMR] = useState<number>(0);
-  const [,setTdee]=useState<number|undefined>()
 
   const { data: isLoggedInData,isSuccess  } = useQuery({
     queryKey: ["isLoggedInData"],
@@ -38,6 +37,12 @@ function App() {
     queryFn: fetchUserDetails,
     enabled: loggedIn !== null,
   })
+  const { data: dailyLogs } = useQuery({
+    queryKey: ["dailyLogsData"],
+    queryFn: fetchDailyLogs,
+    enabled: loggedIn !== null ,
+  })
+
 
   const {mutate:TDEE}=useMutation({
     mutationFn:addTdeeToDb,
@@ -52,6 +57,13 @@ function App() {
     }
   })
 
+  /*const {mutate:insertDailyLogs}=useMutation({
+    mutationFn:insertToDailyLogs,
+    onSuccess:()=>{
+      console.log("Inserted to daily logs")
+    }
+  })*/
+
   useEffect(() => {
     if (isSuccess && isLoggedInData.session !== null && isLoggedInData.session.access_token
     ) {
@@ -61,23 +73,25 @@ function App() {
         // Update user details state if needed
         setUserDetails(userDetailsData[0]);
         const calculatedBMR=calculateBMR(gender,weight,height,age)
-        const calculatedTDEE=calculateTDEE(BMR,activity_level)
+        const calculatedTDEE=calculateTDEE(calculatedBMR,activity_level)
         const calculatedCalorieByGoal=calculateCalorieNeedByGoal(calculatedTDEE,fitness_goal)
 
-        setBMR(calculatedBMR)
-        setTdee(calculatedTDEE)
         TDEE(calculatedTDEE)
         CALORIE(calculatedCalorieByGoal)
 
         setIsDetailsSuccess(true);
-
       }
     } else {
       setLoggedIn(null);
     }
-  }, [detailsSuccess, isLoggedInData, isSuccess, userDetailsData]);
+  }, [CALORIE, TDEE, detailsSuccess, isLoggedInData, isSuccess, userDetailsData]);
 
-  console.log(userDetail)
+   if(userDetail){
+     console.log(userDetail)
+   }
+   if(dailyLogs){
+     console.log(dailyLogs)
+   }
   return (
       <IsLoggedInContext.Provider value={{loggedIn,userDetail,isDetailsSuccess}}>
         <Layout data-oid="xixv02.">

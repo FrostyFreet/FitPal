@@ -21,6 +21,9 @@ export interface UserDetails{
     activity_level:string
     age:number
     tdee?:number | undefined | null
+    calorie_by_goal?:number
+    id?:number
+    supabase_user_id?:number
 }
 
 export interface ContextType{
