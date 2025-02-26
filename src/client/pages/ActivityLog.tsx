@@ -1,9 +1,12 @@
 "use client"
 
-import { useState } from "react"
+import {useContext, useState} from "react"
 import { Link } from "react-router"
 import { ArrowLeft, Plus } from "lucide-react"
 import ActivityModal from "../components/ActivityModal"
+import {fetchDailyActivity} from "../api/fetchDailyActivity.tsx";
+import {useQuery} from "@tanstack/react-query";
+import {IsLoggedInContext} from "../App.tsx";
 
 const activities = [
   { type: "Running", duration: "30 mins", calories: 300 },
@@ -11,8 +14,24 @@ const activities = [
   { type: "Walking", duration: "60 mins", calories: 200 },
 ]
 
+interface workOutType{
+    id:number,
+    duration_minutes:number,
+    workout_type:string,
+    calories_burned:number
+}
+
 export default function ActivityLog() {
     const [isActivityModalOpen, setIsActivityModalOpen] = useState(false)
+    const context=useContext(IsLoggedInContext)!
+    const {loggedIn}=context
+    const {data:workOutData}=useQuery({
+        queryKey:["dailyActivity"],
+        queryFn:fetchDailyActivity,
+        enabled:loggedIn !== null,
+    })
+
+    console.log(workOutData)
 
   return (
       <div className="max-w-7xl mx-auto">
@@ -45,7 +64,9 @@ export default function ActivityLog() {
           </button>
         </div>
         <div className="space-y-4">
-          {activities.map((activity, index) => (
+
+          {!workOutData?
+              activities.map((activity, index) => (
               <div key={index} className="bg-white rounded-lg shadow p-4">
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
                   <div className="mb-2 sm:mb-0">
@@ -58,7 +79,24 @@ export default function ActivityLog() {
                   </div>
                 </div>
               </div>
-          ))}
+          ))
+          :
+              workOutData.map((activity:workOutType) => (
+                  <div key={activity.id} className="bg-white rounded-lg shadow p-4">
+                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
+                          <div className="mb-2 sm:mb-0">
+                              <h3 className="text-lg font-medium text-gray-900">{activity.workout_type}</h3>
+                              <p className="text-sm text-gray-500">Duration: {activity.duration_minutes}</p>
+                          </div>
+                          <div className="text-left sm:text-right">
+                              <p className="text-lg font-medium text-gray-900">{activity.calories_burned} cal</p>
+                              <p className="text-sm text-gray-500">burned</p>
+                          </div>
+                      </div>
+                  </div>
+              ))
+
+          }
         </div>
         <ActivityModal isOpen={isActivityModalOpen} onClose={() => setIsActivityModalOpen(false)} />
       </div>

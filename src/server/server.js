@@ -335,6 +335,31 @@ app.post("/api/insertDailyActivity",async(req,res)=>{
     }
 })
 
+
+app.get("/api/fetchDailyActivity",async(req,res)=>{
+    const { data: sessionData } = await supabase.auth.getSession()
+    if (!sessionData || !sessionData.session || !sessionData.session.user) {
+        res.status(401).send("Unauthorized")
+        return
+    }
+    const userId = sessionData.session.user.id
+    if(sessionData) {
+        try {
+            const{data,error}=await supabase.from('workout_logs')
+                .select('*')
+                .eq("user_id",userId)
+
+            if(error){
+                console.error(error)
+            }
+            res.status(200).json(data)
+
+
+        } catch (e) {
+            console.error(e)
+        }
+    }
+})
 app.listen(port,()=>console.log(`Server is listening on port ${port}`) )
 
 

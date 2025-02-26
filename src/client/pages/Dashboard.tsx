@@ -18,7 +18,8 @@ const default_metrics = [
 
 export default function Dashboard() {
 
-    const loggedIn=useContext(IsLoggedInContext)!
+    const context=useContext(IsLoggedInContext)!
+    const {loggedIn}=context
     const [isActivityModalOpen, setIsActivityModalOpen] = useState<boolean>(false)
     const [isMealModalOpen, setIsMealModalOpen] = useState<boolean>(false)
     const time=new Date().getHours()
