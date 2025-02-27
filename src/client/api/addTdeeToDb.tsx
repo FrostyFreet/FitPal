@@ -4,7 +4,7 @@ import axios from "axios";
 
 export const addTdeeToDb=async(tdee:number)=>{
     try{
-        const response=await axios.post("http://localhost:3000/api/insertTdee",{
+        const response=await axios.post("/api/insertTdee",{
             tdee:tdee
         })
         return response.data

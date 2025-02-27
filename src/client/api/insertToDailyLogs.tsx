@@ -9,7 +9,7 @@ interface propsType{
 
 export const insertToDailyLogs=async({tcc,tcb,ts,twm,notes}:propsType)=>{
     try{
-        const response=await axios.post("http://localhost:3000/api/fetchDailyLogs",{
+        const response=await axios.post("/api/fetchDailyLogs",{
             tcc,
             tcb,
             ts,

@@ -7,7 +7,7 @@ interface propsType{
 
 export const insertWorkout=async({activity,total_calories,duration}:propsType)=>{
     try{
-        const response=await axios.post("http://localhost:3000/api/insertDailyActivity",{
+        const response=await axios.post("/api/insertDailyActivity",{
             activity:activity,
             total_calories:total_calories,
             duration:duration

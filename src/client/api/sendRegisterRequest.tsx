@@ -11,7 +11,7 @@ export const sendRegisterRequest = async ({
   full_name,
 }: registerType) => {
   try {
-    const response = await axios.post("http://localhost:3000/api/register", {
+    const response = await axios.post("/api/register", {
       email: email,
       password: password,
       full_name: full_name,

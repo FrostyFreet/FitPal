@@ -2,7 +2,7 @@ import axios from "axios";
 
 export const fetchCaloriesBurnedByActivity=async(activity:string, duration:number)=>{
     try{
-        const response=await axios.get("http://localhost:3000/api/caloriesBurnedByActivity",{
+        const response=await axios.get("/api/caloriesBurnedByActivity",{
             params: { activity: activity,duration:duration },
         })
         return response.data

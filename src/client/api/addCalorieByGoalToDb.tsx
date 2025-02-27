@@ -4,7 +4,7 @@ import axios from "axios";
 
 export const addCalorieByGoalToDb=async(calorie:number)=>{
     try{
-        const response=await axios.post("http://localhost:3000/api/insertCalorieNeedByGoal",{
+        const response=await axios.post("/api/insertCalorieNeedByGoal",{
             calorie:calorie
         })
         return response.data

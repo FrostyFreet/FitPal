@@ -4,7 +4,7 @@ import {UserDetails} from "../types.tsx";
 
 export const changeUserDetails=async({weight,height,gender,goal,activity_level,age}:UserDetails)=>{
     try{
-        const response=await axios.post("http://localhost:3000/api/changeUserDetails",{
+        const response=await axios.post("/api/changeUserDetails",{
             weight:weight,
             height:height,
             gender:gender,
