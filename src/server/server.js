@@ -14,8 +14,12 @@ const app=express()
 const port = process.env.PORT || 3000;app.use(cors())
 
 app.use(express.json());
+app.use(express.static(path.join(__dirname, "src/client/dist")));
 
 const supabase = createClient(`${process.env.VITE_PROJECT_URL}`, `${process.env.VITE_SUPABASE_ANON_PUBLIC}`);
+app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "src/client/dist", "index.html"));
+});
 
 app.get("/api/isLoggedIn",async(req,res)=>{
     const { data, error } = await supabase.auth.getSession()
