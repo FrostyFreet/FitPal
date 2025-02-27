@@ -4,12 +4,15 @@ import {createClient} from '@supabase/supabase-js'
 import dotenv from 'dotenv';
 import path from 'path';
 import axios from "axios";
+import { fileURLToPath } from 'url';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 dotenv.config({ path: '../../.env'});
 
 const app=express()
-const port=3000
-app.use(cors())
+const port = process.env.PORT || 3000;app.use(cors())
+
 app.use(express.json());
 
 const supabase = createClient(`${process.env.VITE_PROJECT_URL}`, `${process.env.VITE_SUPABASE_ANON_PUBLIC}`);

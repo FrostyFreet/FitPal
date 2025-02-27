@@ -9,7 +9,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "build:client": "cd src/client && npm run build",
-    "start:server": "node src/server/server.js"
+    "build:all": "npm run build:client && tsc -b && vite build",
+    "start:server": "cd src/server && node server.js"
   },
   "dependencies": {
     "@hookform/error-message": "^2.0.1",
