@@ -19,7 +19,6 @@ import {calculateBMR} from "./helperFunctions/CalculateBMR.tsx";
 import {calculateTDEE} from "./helperFunctions/CalculateTDEE.tsx";
 import {addCalorieByGoalToDb} from "./api/addCalorieByGoalToDb.tsx";
 import {calculateCalorieNeedByGoal} from "./helperFunctions/CalculateCalorieNeedByGoal.tsx";
-import {fetchDailyLogs} from "./api/fetchDailyLogs.tsx";
 export const IsLoggedInContext = createContext<ContextType | null>(null)
 
 function App() {
@@ -37,11 +36,6 @@ function App() {
     queryFn: fetchUserDetails,
     enabled: loggedIn !== null,
   })
-  const { data: dailyLogs } = useQuery({
-    queryKey: ["dailyLogsData"],
-    queryFn: fetchDailyLogs,
-    enabled: loggedIn !== null ,
-  })
 
 
   const {mutate:TDEE}=useMutation({
@@ -50,6 +44,7 @@ function App() {
       console.log("Inserted tdee")
     }
   })
+
   const {mutate:CALORIE}=useMutation({
     mutationFn:addCalorieByGoalToDb,
     onSuccess:()=>{
@@ -63,6 +58,7 @@ function App() {
       console.log("Inserted to daily logs")
     }
   })*/
+
 
   useEffect(() => {
     if (isSuccess && isLoggedInData.session !== null && isLoggedInData.session.access_token
@@ -86,12 +82,7 @@ function App() {
     }
   }, [CALORIE, TDEE, detailsSuccess, isLoggedInData, isSuccess, userDetailsData]);
 
-   if(userDetail){
-     console.log(userDetail)
-   }
-   if(dailyLogs){
-     console.log(dailyLogs)
-   }
+
   return (
       <IsLoggedInContext.Provider value={{loggedIn,userDetail,isDetailsSuccess}}>
         <Layout data-oid="xixv02.">

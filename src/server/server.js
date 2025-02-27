@@ -246,7 +246,7 @@ app.get("/api/fetchDailyLogs",async(req,res)=>{
 })
 
 app.post("/api/insertToDailyLogs",async(req,res)=>{
-    const {date,tcc,tcb,ts,twm,notes}=req.body
+    const {tcc,tcb,ts,twm,notes}=req.body
     const { data: sessionData } = await supabase.auth.getSession()
     if (!sessionData || !sessionData.session || !sessionData.session.user) {
         res.status(401).send("Unauthorized")
@@ -256,8 +256,8 @@ app.post("/api/insertToDailyLogs",async(req,res)=>{
 
     try{
         const{data,error}=await supabase.from('daily_logs')
-            .update({user_id:userId,
-                date:date,
+            .update({
+                user_id:userId,
                 total_calories_consumed:tcc,
                 total_calories_burned:tcb,
                 total_steps:ts,
@@ -337,6 +337,7 @@ app.post("/api/insertDailyActivity",async(req,res)=>{
 
 
 app.get("/api/fetchDailyActivity",async(req,res)=>{
+    const today = new Date().toISOString().split('T')[0];
     const { data: sessionData } = await supabase.auth.getSession()
     if (!sessionData || !sessionData.session || !sessionData.session.user) {
         res.status(401).send("Unauthorized")
@@ -348,6 +349,8 @@ app.get("/api/fetchDailyActivity",async(req,res)=>{
             const{data,error}=await supabase.from('workout_logs')
                 .select('*')
                 .eq("user_id",userId)
+                .gte('date', `${today}T00:00:00.000Z`) // Start of the day (UTC)
+                .lt('date', `${today}T23:59:59.999Z`);
 
             if(error){
                 console.error(error)
@@ -360,6 +363,65 @@ app.get("/api/fetchDailyActivity",async(req,res)=>{
         }
     }
 })
+
+app.post("/api/fetchFoodData",async(req,res)=>{
+    const {foodName,weight}=req.body
+    const { data: sessionData } = await supabase.auth.getSession()
+    if (!sessionData || !sessionData.session || !sessionData.session.user) {
+        res.status(401).send("Unauthorized")
+        return
+    }
+    const userId = sessionData.session.user.id
+    if(sessionData) {
+        try {
+            const response=await axios.post("https://trackapi.nutritionix.com/v2/natural/nutrients",
+                {
+                    query:`${weight}g ${foodName}`
+                },
+                {
+                    headers: {
+                        'x-app-key': process.env.VITE_API_NINJA_API_KEY,
+                        'x-app-id': process.env.VITE_NUTRITIONIX_Application_ID,
+                        'x-remote-user-id': 0,
+                        'Content-Type': 'application/json'
+                    }
+                }
+
+            )
+            const foodData = response.data.foods[0];
+
+            if(response.data){
+                const{error}=await supabase.from('meal_items')
+                    .upsert([
+                        {
+                            user_id: userId,
+                            meal_type: 'breakfast',
+                            date: new Date(),
+                            food_name: foodData.food_name,
+                            quantity: foodData.serving_qty,
+                            unit: foodData.serving_unit,
+                            calories: foodData.calories,
+                            protein: foodData.protein,
+                            carbs: foodData.carbs,
+                            fat: foodData.fat
+                        }
+                    ]);
+
+                if(error){
+                    console.error(error)
+                }
+            }
+
+
+
+        } catch (e) {
+            console.error(e)
+        }
+    }
+
+
+})
+
 app.listen(port,()=>console.log(`Server is listening on port ${port}`) )
 
 
