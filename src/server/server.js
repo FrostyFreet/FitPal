@@ -13,14 +13,16 @@ dotenv.config({ path: '../../.env'});
 const app=express()
 const port = process.env.PORT || 3000;app.use(cors())
 
-const clientBuildPath = path.join(__dirname, "../../client/dist");
+
 
 app.use(express.json());
-app.use(express.static(clientBuildPath));
 
 const supabase = createClient(`${process.env.VITE_PROJECT_URL}`, `${process.env.VITE_SUPABASE_ANON_PUBLIC}`);
-app.get("*", (req, res) => {
-    res.sendFile(path.join(clientBuildPath, "index.html"));
+
+app.use(express.static(path.join(__dirname, '../client/dist')));
+
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../client/dist/index.html'));
 });
 
 app.get("/api/isLoggedIn",async(req,res)=>{
