@@ -22,9 +22,7 @@ const supabase = createClient(`${process.env.VITE_PROJECT_URL}`, `${process.env.
 
 app.use(express.static(path.join(__dirname, '../client/dist')));
 
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../client/dist/index.html'));
-});
+
 
 app.get("/api/isLoggedIn",async(req,res)=>{
     const { data, error } = await supabase.auth.getSession()
@@ -433,7 +431,9 @@ app.post("/api/fetchFoodData",async(req,res)=>{
 
 
 })
-
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+});
 app.listen(port,()=>console.log(`Server is listening on port ${port}`) )
 
 
